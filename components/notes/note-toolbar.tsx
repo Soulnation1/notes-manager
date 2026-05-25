@@ -1,9 +1,11 @@
 "use client";
-
+import { ArrowLeftIcon,  PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { PinIcon } from "@/components/notes/note-list-item";
-import { useNotes } from "@/components/notes/notes-context";
+import Link from "next/link";
+import {
+  CollaboratorsPanel,
+  getInitials,
+} from "@/components/notes/collaborators-panel";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { formatNoteDate } from "@/lib/utils/date";
@@ -11,78 +13,82 @@ import type { Note } from "@/lib/types/note";
 
 type NoteToolbarProps = {
   note: Note;
-  isEditing: boolean;
-  onEdit: () => void;
-  onCancelEdit?: () => void;
 };
 
-export function NoteToolbar({
-  note,
-  isEditing,
-  onEdit,
-  onCancelEdit,
-}: NoteToolbarProps) {
-  const router = useRouter();
-  const { togglePin, deleteNote } = useNotes();
-  const [deleteOpen, setDeleteOpen] = useState(false);
-
-  function handleDelete() {
-    deleteNote(note.id);
-    router.push("/notes");
-  }
+export function NoteToolbar({ note }: NoteToolbarProps) {
+  const [collaboratorsOpen, setCollaboratorsOpen] = useState(false);
+  const activeEditors = note.collaborators.filter(
+    (collaborator) => collaborator.presence === "editing",
+  );
+  const editingNow = [
+    { id: "owner", name: "You" },
+    ...activeEditors.map((editor) => ({
+      id: editor.id,
+      name: editor.name,
+    })),
+  ];
 
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-        <p className="text-xs text-ink-faint">
-          Updated {formatNoteDate(note.updatedAt)}
-        </p>
+        <div>
+          <Link
+            href="/notes"
+            className="mb-1 inline-flex text-xs font-medium text-accent md:hidden"
+          >
+            <p className="mr-2 text-xs font-medium text-accent "><span><ArrowLeftIcon className="w-4 h-4 inline" /></span>back </p>          </Link>
+          <p className="text-xs text-ink-faint">
+            Updated {formatNoteDate(note.updatedAt)}
+          </p>
+        </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            className="gap-1.5 px-3"
-            onClick={() => togglePin(note.id)}
-            aria-pressed={note.pinned}
-          >
-            <PinIcon filled={note.pinned} />
-            {note.pinned ? "Unpin" : "Pin"}
-          </Button>
-
-          {!isEditing && (
-            <Button type="button" variant="secondary" onClick={onEdit}>
-              Edit
+          <div className="flex items-center gap-2 pr-1">
+            {editingNow.length > 0 && (
+              <div
+                className="flex -space-x-2"
+                aria-label={`${editingNow.length} person${editingNow.length === 1 ? "" : "s"
+                  } editing now`}
+              >
+                {editingNow.slice(0, 3).map((editor) => (
+                  <span
+                    key={editor.id}
+                    title={`${editor.name} is editing`}
+                    className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-paper bg-accent-muted text-[0.6875rem] font-semibold text-accent shadow-sm"
+                  >
+                    {getInitials(editor.name)}
+                    <span className="absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 border-paper bg-accent" />
+                  </span>
+                ))}
+              </div>
+            )}
+            <Button
+              type="button"
+              variant="primary"
+              className="px-2"
+              onClick={() => setCollaboratorsOpen(true)}
+            >
+              <PlusIcon className="w-4 h-4 inline" /> Collaborators
             </Button>
-          )}
-
-          {isEditing && onCancelEdit && (
-            <Button type="button" variant="ghost" onClick={onCancelEdit}>
-              Cancel
-            </Button>
-          )}
-
-          <Button
-            type="button"
-            variant="ghost"
-            className="text-red-600 hover:bg-red-50 hover:text-red-700"
-            onClick={() => setDeleteOpen(true)}
-          >
-            Delete
-          </Button>
+          </div>
         </div>
       </div>
 
       <Modal
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        title="Delete this note?"
-        description={`"${note.title}" will be removed permanently. This cannot be undone.`}
-        confirmLabel="Delete note"
-        cancelLabel="Keep note"
-        onConfirm={handleDelete}
-        destructive
-      />
+        open={collaboratorsOpen}
+        onClose={() => setCollaboratorsOpen(false)}
+        title="Collaborators"
+        description={
+          activeEditors.length > 0
+            ? `${activeEditors
+              .map((editor) => editor.name)
+              .join(", ")} editing with you now.`
+            : "Only you are editing right now."
+        }
+        cancelLabel="Done"
+      >
+        <CollaboratorsPanel note={note} />
+      </Modal>
     </>
   );
 }

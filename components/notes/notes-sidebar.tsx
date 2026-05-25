@@ -7,13 +7,24 @@ import { NoteListItem } from "@/components/notes/note-list-item";
 import { useNotes } from "@/components/notes/notes-context";
 import { splitPinnedNotes } from "@/lib/utils/note";
 
-export function NotesSidebar() {
+type NotesSidebarProps = {
+  className?: string;
+};
+
+export function NotesSidebar({ className = "" }: NotesSidebarProps) {
   const pathname = usePathname();
   const { notes } = useNotes();
   const { pinned, unpinned } = splitPinnedNotes(notes);
 
   return (
-    <aside className="flex h-full w-full flex-col border-r border-border bg-paper-elevated md:w-72 lg:w-80">
+    <aside
+      className={[
+        "h-screen w-full shrink-0 flex-col border-r border-border bg-paper-elevated md:w-72 lg:w-80",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="border-b border-border px-4 py-4">
         <Logo href="/notes" />
       </div>

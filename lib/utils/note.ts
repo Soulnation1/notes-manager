@@ -1,7 +1,20 @@
 import type { Note } from "@/lib/types/note";
 
+function stripHtml(content: string): string {
+  return content
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+}
+
 export function getNotePreview(content: string, maxLength = 80): string {
-  const line = content.trim().split("\n")[0] ?? "";
+  const line = stripHtml(content).trim().split("\n")[0] ?? "";
   if (line.length <= maxLength) {
     return line || "No content yet";
   }

@@ -5,6 +5,7 @@ export type Collaborator = {
   name: string;
   email: string;
   role: CollaboratorRole;
+  presence?: "editing" | "viewing" | "offline";
 };
 
 export type Note = {

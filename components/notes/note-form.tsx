@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CollaboratorsPanel } from "@/components/notes/collaborators-panel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import type { Note } from "@/lib/types/note";
+import { useToast } from "@/components/ui/toast";
+import { noteFormSchema } from "@/lib/validations/note";
+import { parseFormData } from "@/lib/validations/parse-form";
 
 type NoteFormProps = {
   mode: "create" | "edit";
   initialTitle?: string;
   initialContent?: string;
-  note?: Note;
   onSubmit: (data: { title: string; content: string }) => void;
   onCancel?: () => void;
   submitLabel?: string;
@@ -21,24 +21,34 @@ export function NoteForm({
   mode,
   initialTitle = "",
   initialContent = "",
-  note,
   onSubmit,
   onCancel,
   submitLabel,
 }: NoteFormProps) {
+  const { showToast } = useToast();
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    onSubmit({ title, content });
+    const result = parseFormData(noteFormSchema, new FormData(e.currentTarget));
+
+    if (!result.success) {
+      setErrors(result.errors);
+      showToast("Please fix the note details.", "error");
+      return;
+    }
+
+    setErrors({});
+    onSubmit(result.data);
   }
 
   const label =
     submitLabel ?? (mode === "create" ? "Create note" : "Save changes");
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <div className="space-y-1.5">
         <label htmlFor="note-title" className="text-sm font-medium text-ink">
           Title
@@ -47,9 +57,13 @@ export function NoteForm({
           id="note-title"
           name="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setErrors((prev) => ({ ...prev, title: "" }));
+          }}
           placeholder="Note title"
           className="text-lg font-medium"
+          error={errors.title}
         />
       </div>
 
@@ -61,15 +75,15 @@ export function NoteForm({
           id="note-content"
           name="content"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(value) => {
+            setContent(value);
+            setErrors((prev) => ({ ...prev, content: "" }));
+          }}
           placeholder="Start writing…"
           className="min-h-[280px] font-normal"
+          error={errors.content}
         />
       </div>
-
-      {note && mode === "edit" && (
-        <CollaboratorsPanel note={note} />
-      )}
 
       <div className="flex flex-wrap gap-2 border-t border-border pt-4">
         <Button type="submit">{label}</Button>

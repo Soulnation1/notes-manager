@@ -26,7 +26,7 @@ type NotesContextValue = {
   addCollaborator: (
     noteId: string,
     collaborator: Omit<Collaborator, "id">,
-  ) => void;
+  ) => boolean;
   removeCollaborator: (noteId: string, collaboratorId: string) => void;
 };
 
@@ -107,20 +107,21 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       noteId: string,
       collaborator: Omit<Collaborator, "id"> & { role?: CollaboratorRole },
     ) => {
+      const note = notes.find((item) => item.id === noteId);
+      if (!note || note.collaborators.some((c) => c.email === collaborator.email)) {
+        return false;
+      }
+
       setNotes((prev) =>
-        prev.map((note) => {
-          if (note.id !== noteId) {
-            return note;
+        prev.map((item) => {
+          if (item.id !== noteId) {
+            return item;
           }
-          if (
-            note.collaborators.some((c) => c.email === collaborator.email)
-          ) {
-            return note;
-          }
+
           return {
-            ...note,
+            ...item,
             collaborators: [
-              ...note.collaborators,
+              ...item.collaborators,
               {
                 id: createId("collab"),
                 name: collaborator.name,
@@ -132,8 +133,9 @@ export function NotesProvider({ children }: { children: ReactNode }) {
           };
         }),
       );
+      return true;
     },
-    [],
+    [notes],
   );
 
   const removeCollaborator = useCallback(

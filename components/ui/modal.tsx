@@ -14,6 +14,7 @@ type ModalProps = {
   onConfirm?: () => void;
   confirmVariant?: "primary" | "secondary" | "ghost";
   destructive?: boolean;
+  showFooter?: boolean;
 };
 
 export function Modal({
@@ -26,6 +27,7 @@ export function Modal({
   cancelLabel = "Cancel",
   onConfirm,
   destructive = false,
+  showFooter = true,
 }: ModalProps) {
   useEffect(() => {
     if (!open) {
@@ -72,24 +74,28 @@ export function Modal({
           <p className="mt-2 text-sm text-ink-muted">{description}</p>
         )}
         {children && <div className="mt-4">{children}</div>}
-        <div className="mt-6 flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={onClose}>
-            {cancelLabel}
-          </Button>
-          {onConfirm && (
-            <Button
-              type="button"
-              variant={destructive ? "primary" : "primary"}
-              className={destructive ? "bg-red-600 hover:bg-red-700 text-white" : ""}
-              onClick={() => {
-                onConfirm();
-                onClose();
-              }}
-            >
-              {confirmLabel}
+        {showFooter && (
+          <div className="mt-6 flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={onClose}>
+              {cancelLabel}
             </Button>
-          )}
-        </div>
+            {onConfirm && (
+              <Button
+                type="button"
+                variant={destructive ? "primary" : "primary"}
+                className={
+                  destructive ? "bg-red-600 hover:bg-red-700 text-white" : ""
+                }
+                onClick={() => {
+                  onConfirm();
+                  onClose();
+                }}
+              >
+                {confirmLabel}
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

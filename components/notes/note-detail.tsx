@@ -1,10 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { CollaboratorsPanel } from "@/components/notes/collaborators-panel";
-import { NoteForm } from "@/components/notes/note-form";
 import { NoteToolbar } from "@/components/notes/note-toolbar";
-import { useNotes } from "@/components/notes/notes-context";
 import type { Note } from "@/lib/types/note";
 
 type NoteDetailProps = {
@@ -12,57 +8,26 @@ type NoteDetailProps = {
 };
 
 export function NoteDetail({ note }: NoteDetailProps) {
-  const { updateNote } = useNotes();
-  const [isEditing, setIsEditing] = useState(false);
-
-  function handleSave(data: { title: string; content: string }) {
-    updateNote(note.id, data);
-    setIsEditing(false);
-  }
-
-  if (isEditing) {
-    return (
-      <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-8 sm:py-8">
-        <NoteToolbar
-          note={note}
-          isEditing
-          onEdit={() => {}}
-          onCancelEdit={() => setIsEditing(false)}
-        />
-        <NoteForm
-          mode="edit"
-          note={note}
-          initialTitle={note.title}
-          initialContent={note.content}
-          onSubmit={handleSave}
-          onCancel={() => setIsEditing(false)}
-        />
-      </div>
-    );
-  }
+  const hasRichContent = note.content.trim().startsWith("<");
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-8 sm:py-8">
-      <NoteToolbar
-        note={note}
-        isEditing={false}
-        onEdit={() => setIsEditing(true)}
-      />
+    <div className="w-full max-w-4xl px-4 py-4 sm:px-8 sm:py-6 lg:px-10">
+      <NoteToolbar note={note} />
 
-      <article className="mt-6">
+      <article className="mt-6 min-h-[calc(100vh-11rem)] rounded-lg border border-border bg-paper-elevated px-6 py-8 shadow-[var(--shadow)] sm:px-12 sm:py-10">
         <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
           {note.title}
         </h1>
-        <div className="mt-6 whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-ink">
-          {note.content || (
+        <div className="mt-6 text-[0.9375rem] leading-relaxed text-ink [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6">
+          {note.content && hasRichContent ? (
+            <div dangerouslySetInnerHTML={{ __html: note.content }} />
+          ) : note.content ? (
+            <div className="whitespace-pre-wrap">{note.content}</div>
+          ) : (
             <p className="text-ink-faint italic">This note is empty.</p>
           )}
         </div>
       </article>
-
-      <div className="mt-10">
-        <CollaboratorsPanel note={note} />
-      </div>
     </div>
   );
 }

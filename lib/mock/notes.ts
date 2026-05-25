@@ -14,6 +14,7 @@ export const initialNotes: Note[] = [
         name: "Johidan Lee",
         email: "johidan@example.com",
         role: "editor",
+        presence: "editing",
       },
     ],
   },
@@ -30,11 +31,29 @@ export const initialNotes: Note[] = [
         name: "Jordan Lee",
         email: "jordan@example.com",
         role: "editor",
+        presence: "editing",
       },
     ],
   },
   {
-    id: "note-1",
+    id: "note-10",
+    title: "Q9 planing center",
+    content:
+      "Focus areas:\n- Mobile onboarding refresh\n- Shared notes with collaborators\n- Pin important notes to the top. for the first time",
+    pinned: false,
+    updatedAt: "2026-05-24T14:30:00.000Z",
+    collaborators: [
+      {
+        id: "collab-1",
+        name: "Johidan Lee",
+        email: "johidan@example.com",
+        role: "editor",
+        presence: "editing",
+      },
+    ],
+  },
+  {
+    id: "note-7",
     title: "Q4 planning ideas",
     content:
       "Focus areas:\n- Mobile onboarding method refresh\n- Shared notes with collaborators\n- Pin important notes to the top",
@@ -46,6 +65,24 @@ export const initialNotes: Note[] = [
         name: "Jordan Lee",
         email: "jordan@example.com",
         role: "editor",
+        presence: "viewing",
+      },
+    ],
+  },
+  {
+    id: "note-11",
+    title: "Q2 planning center",
+    content:
+      "Focus areas:\n- Mobile onboarding refresh\n- Shared notes with collaborators\n- Pin important notes to the top. for the first time",
+    pinned: false,
+    updatedAt: "2026-05-24T14:30:00.000Z",
+    collaborators: [
+      {
+        id: "collab-1",
+        name: "Johidan Lee",
+        email: "johidan@example.com",
+        role: "editor",
+        presence: "editing",
       },
     ],
   },
@@ -70,12 +107,143 @@ export const initialNotes: Note[] = [
         name: "Sam Rivera",
         email: "sam@example.com",
         role: "editor",
+        presence: "editing",
       },
       {
         id: "collab-3",
         name: "Alex Morgan",
         email: "alex@example.com",
         role: "viewer",
+        presence: "viewing",
+      },
+    ],
+  },
+  {
+    id: "note-1",
+    title: "Q2 planning center",
+    content:
+      "Focus areas:\n- Mobile onboarding refresh\n- Shared notes with collaborators\n- Pin important notes to the top. for the first time",
+    pinned: false,
+    updatedAt: "2026-05-24T14:30:00.000Z",
+    collaborators: [
+      {
+        id: "collab-1",
+        name: "Johidan Lee",
+        email: "johidan@example.com",
+        role: "editor",
+        presence: "editing",
+      },
+    ],
+  }, {
+    id: "note-1",
+    title: "Q2 planning center",
+    content:
+      "Focus areas:\n- Mobile onboarding refresh\n- Shared notes with collaborators\n- Pin important notes to the top. for the first time",
+    pinned: false,
+    updatedAt: "2026-05-24T14:30:00.000Z",
+    collaborators: [
+      {
+        id: "collab-1",
+        name: "Johidan Lee",
+        email: "johidan@example.com",
+        role: "editor",
+        presence: "editing",
+      },
+    ],
+  }, {
+    id: "note-1",
+    title: "Q2 planning center",
+    content:
+      "Focus areas:\n- Mobile onboarding refresh\n- Shared notes with collaborators\n- Pin important notes to the top. for the first time",
+    pinned: false,
+    updatedAt: "2026-05-24T14:30:00.000Z",
+    collaborators: [
+      {
+        id: "collab-1",
+        name: "Johidan Lee",
+        email: "johidan@example.com",
+        role: "editor",
+        presence: "editing",
+      },
+    ],
+  }, {
+    id: "note-1",
+    title: "Q2 planning center",
+    content:
+      "Focus areas:\n- Mobile onboarding refresh\n- Shared notes with collaborators\n- Pin important notes to the top. for the first time",
+    pinned: false,
+    updatedAt: "2026-05-24T14:30:00.000Z",
+    collaborators: [
+      {
+        id: "collab-1",
+        name: "Johidan Lee",
+        email: "johidan@example.com",
+        role: "editor",
+        presence: "editing",
+      },
+    ],
+  }, {
+    id: "note-1",
+    title: "Q2 planning center",
+    content:
+      "Focus areas:\n- Mobile onboarding refresh\n- Shared notes with collaborators\n- Pin important notes to the top. for the first time",
+    pinned: false,
+    updatedAt: "2026-05-24T14:30:00.000Z",
+    collaborators: [
+      {
+        id: "collab-1",
+        name: "Johidan Lee",
+        email: "johidan@example.com",
+        role: "editor",
+        presence: "editing",
+      },
+    ],
+  }, {
+    id: "note-1",
+    title: "Q2 planning center",
+    content:
+      "Focus areas:\n- Mobile onboarding refresh\n- Shared notes with collaborators\n- Pin important notes to the top. for the first time",
+    pinned: false,
+    updatedAt: "2026-05-24T14:30:00.000Z",
+    collaborators: [
+      {
+        id: "collab-1",
+        name: "Johidan Lee",
+        email: "johidan@example.com",
+        role: "editor",
+        presence: "editing",
+      },
+    ],
+  }, {
+    id: "note-1",
+    title: "Q2 planning center",
+    content:
+      "Focus areas:\n- Mobile onboarding refresh\n- Shared notes with collaborators\n- Pin important notes to the top. for the first time",
+    pinned: false,
+    updatedAt: "2026-05-24T14:30:00.000Z",
+    collaborators: [
+      {
+        id: "collab-1",
+        name: "Johidan Lee",
+        email: "johidan@example.com",
+        role: "editor",
+        presence: "editing",
+      },
+    ],
+  }, {
+    id: "note-1",
+    title: "Q2 planning center",
+    content:
+      "Focus areas:\n- Mobile onboarding refresh\n- Shared notes with collaborators\n- Pin important notes to the top. for the first time",
+    pinned: false,
+    updatedAt: "2026-05-24T14:30:00.000Z",
+    collaborators: [
+      {
+        id: "collab-1",
+        name: "Johidan Lee",
+        email: "johidan@example.com",
+        role: "editor",
+        presence: "editing",
       },
     ],
   },

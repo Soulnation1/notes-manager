@@ -27,7 +27,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       <div className="relative z-10 w-full max-w-[26rem]">
         <div className="mb-8 flex flex-col items-center gap-2 text-center sm:mb-10">
           <Logo href="/signin" />
-          <p className="text-sm text-ink-faint">Capture ideas. Stay organized.</p>
+          <p className="text-sm text-ink-faint">Capture ideasxxxxx. Stay organized.</p>
         </div>
 
         {children}
