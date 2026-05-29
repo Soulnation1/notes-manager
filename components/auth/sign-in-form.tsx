@@ -1,12 +1,17 @@
 "use client";
 
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+
 import { FormField } from "@/components/auth/form-field";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
+
 import { signInSchema } from "@/lib/validations/auth";
 import { parseFormData } from "@/lib/validations/parse-form";
+
+import { useSignIn } from "@/lib/utils/api/hooks/useSignIn";
 
 type FieldErrors = {
   email?: string;
@@ -16,29 +21,44 @@ type FieldErrors = {
 
 export function SignInForm() {
   const router = useRouter();
+
+  const { mutateAsync, isPending } = useSignIn();
+
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setErrors({});
 
-    const result = parseFormData(signInSchema, new FormData(event.currentTarget));
+    const result = parseFormData(
+      signInSchema,
+      new FormData(event.currentTarget),
+    );
 
     if (!result.success) {
       setErrors(result.errors);
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      const data = await mutateAsync(result.data);
+
+      localStorage.setItem("token", data.token);
+
       router.push("/notes");
-    } catch {
-      setErrors({ form: "Something went wrong. Please try again." });
-    } finally {
-      setIsSubmitting(false);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setErrors({
+          form: error.response?.data?.error?.message || "Failed to sign in",
+        });
+
+        return;
+      }
+
+      setErrors({
+        form: "Something went wrong. Please try again.",
+      });
     }
   }
 
@@ -53,7 +73,7 @@ export function SignInForm() {
         autoComplete="email"
         required
         error={errors.email}
-        disabled={isSubmitting}
+        disabled={isPending}
       />
 
       <PasswordField
@@ -64,7 +84,7 @@ export function SignInForm() {
         autoComplete="current-password"
         required
         error={errors.password}
-        disabled={isSubmitting}
+        disabled={isPending}
         labelAction={
           <button
             type="button"
@@ -86,9 +106,9 @@ export function SignInForm() {
           type="submit"
           fullWidth
           className="py-3 text-[0.9375rem]"
-          disabled={isSubmitting}
+          disabled={isPending}
         >
-          {isSubmitting ? "Signing in…" : "Sign in"}
+          {isPending ? "Signing in..." : "Sign in"}
         </Button>
       </div>
     </form>

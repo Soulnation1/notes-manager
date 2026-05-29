@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,8 +14,6 @@ import { useSignup } from "@/lib/utils/api/hooks/useSignUp";
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export function SignUpForm() {
-  const router = useRouter();
-
   const { mutateAsync, isPending } = useSignup();
 
   const {
@@ -30,11 +27,15 @@ export function SignUpForm() {
   async function onSubmit(data: SignUpFormData) {
     const { confirmPassword, ...payload } = data;
 
-    await mutateAsync(payload);
+    try {
+      await mutateAsync(payload);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <FormField
         label="Full name"
         id="name"
@@ -66,6 +67,7 @@ export function SignUpForm() {
         error={errors.password?.message}
         {...register("password")}
       />
+
       <PasswordField
         label="Confirm password"
         id="confirmPassword"
