@@ -33,7 +33,6 @@ export function SignInForm() {
     setIsSubmitting(true);
 
     try {
-      // TODO: call sign-in API with result.data when auth is wired up
       await new Promise((resolve) => setTimeout(resolve, 400));
       router.push("/notes");
     } catch {

@@ -1,118 +1,84 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
 import { FormField } from "@/components/auth/form-field";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
-import { signUpSchema } from "@/lib/validations/auth";
-import { parseFormData } from "@/lib/validations/parse-form";
 
-type FieldErrors = {
-  name?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  form?: string;
-};
+import { signUpSchema } from "@/lib/validations/auth";
+import { useSignup } from "@/lib/utils/api/hooks/useSignUp";
+
+type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export function SignUpForm() {
   const router = useRouter();
-  const [errors, setErrors] = useState<FieldErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setErrors({});
+  const { mutateAsync, isPending } = useSignup();
 
-    const result = parseFormData(signUpSchema, new FormData(event.currentTarget));
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+  });
 
-    if (!result.success) {
-      setErrors(result.errors);
-      return;
-    }
+  async function onSubmit(data: SignUpFormData) {
+    const { confirmPassword, ...payload } = data;
 
-    setIsSubmitting(true);
-
-    try {
-      // TODO: call sign-up API with result.data when auth is wired up
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      router.push("/signin");
-    } catch {
-      setErrors({ form: "Something went wrong. Please try again." });
-    } finally {
-      setIsSubmitting(false);
-    }
+    await mutateAsync(payload);
   }
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
       <FormField
         label="Full name"
         id="name"
         type="text"
-        name="name"
         placeholder="Alex Morgan"
         autoComplete="name"
         required
-        error={errors.name}
-        disabled={isSubmitting}
+        error={errors.name?.message}
+        {...register("name")}
       />
 
       <FormField
         label="Email"
         id="email"
         type="email"
-        name="email"
         placeholder="you@example.com"
         autoComplete="email"
         required
-        error={errors.email}
-        disabled={isSubmitting}
+        error={errors.email?.message}
+        {...register("email")}
       />
 
       <PasswordField
         label="Password"
         id="password"
-        name="password"
-        placeholder="At least 8 characters"
+        placeholder="At least 6 characters"
         autoComplete="new-password"
         required
-        error={errors.password}
-        disabled={isSubmitting}
+        error={errors.password?.message}
+        {...register("password")}
       />
-
       <PasswordField
         label="Confirm password"
-        id="confirm-password"
-        name="confirmPassword"
+        id="confirmPassword"
         placeholder="Repeat your password"
         autoComplete="new-password"
         required
-        error={errors.confirmPassword}
-        disabled={isSubmitting}
+        error={errors.confirmPassword?.message}
+        {...register("confirmPassword")}
       />
 
-      <p className="text-xs leading-relaxed text-ink-faint">
-        By signing up, you agree to our terms of service and privacy policy.
-      </p>
-
-      {errors.form && (
-        <p className="text-sm text-red-600" role="alert">
-          {errors.form}
-        </p>
-      )}
-
-      <div className="pt-1">
-        <Button
-          type="submit"
-          fullWidth
-          className="py-3 text-[0.9375rem]"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Creating account…" : "Create account"}
-        </Button>
-      </div>
+      <Button type="submit" fullWidth disabled={isPending} className="py-3">
+        {isPending ? "Creating account..." : "Create account"}
+      </Button>
     </form>
   );
 }

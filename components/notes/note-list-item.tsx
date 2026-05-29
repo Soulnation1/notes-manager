@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { NoteForm } from "@/components/notes/note-form";
 import { useNotes } from "@/components/notes/notes-context";
 import { Modal } from "@/components/ui/modal";
@@ -10,38 +10,79 @@ import { useToast } from "@/components/ui/toast";
 import { formatNoteDate } from "@/lib/utils/date";
 import { getNotePreview } from "@/lib/utils/note";
 import type { Note } from "@/lib/types/note";
-
-type NoteListItemProps = {
+export function NoteListItem({
+  note,
+  isActive,
+}: {
   note: Note;
   isActive: boolean;
-};
-
-export function NoteListItem({ note, isActive }: NoteListItemProps) {
+}) {
   const router = useRouter();
   const { deleteNote, togglePin, updateNote } = useNotes();
   const { showToast } = useToast();
+
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  function handleDelete() {
-    deleteNote(note.id);
-    showToast(`"${note.title}" was deleted.`, "success");
-    if (isActive) {
-      router.push("/notes");
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mouseover", handleClickOutside);
+    return () => {
+      document.removeEventListener("mouseover", handleClickOutside);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen]);
+
+  async function handleDelete() {
+    try {
+      await deleteNote(note.id);
+      showToast(`"${note.title}" was deleted.`, "success");
+      if (isActive) {
+        router.push("/notes");
+      }
+    } catch {
+      showToast("Failed to delete note.", "error");
     }
   }
 
-  function handleTogglePin() {
-    togglePin(note.id);
-    showToast(
-      `"${note.title}" was ${note.pinned ? "unpinned" : "pinned"}.`,
-      "success",
-    );
+  async function handleTogglePin() {
+    try {
+      await togglePin(note.id);
+      showToast(
+        `"${note.title}" was ${note.pinned ? "unpinned" : "pinned"}.`,
+        "success",
+      );
+    } catch {
+      showToast("Failed to toggle pin.", "error");
+    }
   }
 
-  function handleEdit(data: { title: string; content: string }) {
-    updateNote(note.id, data);
-    setEditOpen(false);
+  async function handleEdit(data: { title: string; content: string }) {
+    try {
+      await updateNote(note.id, data);
+      setEditOpen(false);
+    } catch {
+      showToast("Failed to update note.", "error");
+    }
   }
 
   return (
@@ -54,7 +95,7 @@ export function NoteListItem({ note, isActive }: NoteListItemProps) {
             : "border-transparent hover:border-border hover:bg-paper-elevated",
         ].join(" ")}
       >
-        <Link href={`/notes/${note.id}`} className="block px-3 py-2.5 pr-28">
+        <Link href={`/notes/${note.id}`} className="block px-3 py-2.5 pr-10">
           <div className="flex items-start justify-between gap-2">
             <span className="line-clamp-1 text-sm font-medium text-ink">
               {note.title}
@@ -77,40 +118,78 @@ export function NoteListItem({ note, isActive }: NoteListItemProps) {
           </div>
         </Link>
 
-        <div className="absolute right-2 top-2 flex items-center gap-1">
+        <div ref={menuRef} className="absolute flex right-2 top-2">
+          <div>
+            <button
+                  type="button"
+                  className={[
+                    " w-full flex items-center gap-1 rounded-md px-2 py-1.5 text-left text-xs transition-colors focus:outline-none",
+                    note.pinned
+                      ? "text-accent font-medium hover:bg-accent-muted"
+                      : "text-ink hover:bg-accent-muted hover:text-accent",
+                  ].join(" ")}
+                  role="menuitem"
+                  onClick={() => {
+                    handleTogglePin();
+                    setMenuOpen(false);
+                  }}
+                >
+                  <PinIcon filled={note.pinned} />
+                </button>
+          </div>
           <button
             type="button"
             className={[
               "flex h-7 w-7 items-center justify-center rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
-              note.pinned
-                ? "bg-paper text-accent"
+              menuOpen
+                ? "bg-paper text-accent border border-border/40"
                 : "text-ink-faint hover:bg-paper hover:text-accent",
             ].join(" ")}
-            onClick={handleTogglePin}
-            aria-label={`${note.pinned ? "Unpin" : "Pin"} ${note.title}`}
-            aria-pressed={note.pinned}
-            title={note.pinned ? "Unpin note" : "Pin note"}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={`Options for ${note.title}`}
+            aria-haspopup="true"
+            aria-expanded={menuOpen}
+            title="Options"
           >
-            <PinIcon filled={note.pinned} />
+            <MoreVerticalIcon />
           </button>
-          <button
-            type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-md text-ink-faint transition-colors hover:bg-paper hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-            onClick={() => setEditOpen(true)}
-            aria-label={`Edit ${note.title}`}
-            title="Edit note"
-          >
-            <EditIcon />
-          </button>
-          <button
-            type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-md text-ink-faint transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/40"
-            onClick={() => setDeleteOpen(true)}
-            aria-label={`Delete ${note.title}`}
-            title="Delete note"
-          >
-            <TrashIcon />
-          </button>
+
+          {menuOpen && (
+            <div className="absolute right-0 mt-1 w-32 origin-top-right rounded-lg border border-border bg-paper p-1 shadow-lg z-20">
+              <div
+                className="flex flex-col gap-0.5"
+                role="menu"
+                aria-orientation="vertical"
+              >
+                
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-ink transition-colors hover:bg-accent-muted hover:text-accent focus:outline-none"
+                  role="menuitem"
+                  onClick={() => {
+                    setEditOpen(true);
+                    setMenuOpen(false);
+                  }}
+                >
+                  <EditIcon />
+                  <span>Edit</span>
+                </button>
+                <div className="my-0.5 border-t border-border" />
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 focus:outline-none"
+                  role="menuitem"
+                  onClick={() => {
+                    setDeleteOpen(true);
+                    setMenuOpen(false);
+                  }}
+                >
+                  <TrashIcon />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -208,6 +287,26 @@ export function PinIcon({
       <path d="M12 17v5" />
       <path d="M9 3h6l1 7H8l1-7z" />
       <path d="M9 10v4l-3 3h12l-3-3v-4" />
+    </svg>
+  );
+}
+
+function MoreVerticalIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="12" cy="5" r="1.5" />
+      <circle cx="12" cy="19" r="1.5" />
     </svg>
   );
 }
