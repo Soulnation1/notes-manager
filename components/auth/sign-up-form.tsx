@@ -8,7 +8,7 @@ import { FormField } from "@/components/auth/form-field";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
 
-import { signUpSchema } from "@/lib/validations/auth";
+import { SignUpInput, signUpSchema } from "@/lib/validations/auth";
 import { useSignup } from "@/lib/utils/api/hooks/useSignUp";
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
@@ -17,25 +17,24 @@ export function SignUpForm() {
   const { mutateAsync, isPending } = useSignup();
 
   const {
-    register,
     handleSubmit,
+    register,
     formState: { errors },
-  } = useForm<SignUpFormData>({
+  } = useForm<SignUpInput>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
     resolver: zodResolver(signUpSchema),
   });
 
-  async function onSubmit(data: SignUpFormData) {
-    const { confirmPassword, ...payload } = data;
-
-    try {
-      await mutateAsync(payload);
-    } catch (error) {
-      console.log(error);
-    }
+  const onsubmit = async (data: SignUpInput) => {
+    mutateAsync(data)
   }
 
+
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-4" onSubmit={handleSubmit(onsubmit)}>
       <FormField
         label="Full name"
         id="name"

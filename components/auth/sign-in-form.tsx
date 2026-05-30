@@ -2,73 +2,44 @@
 
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
 
 import { FormField } from "@/components/auth/form-field";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
 
-import { signInSchema } from "@/lib/validations/auth";
-import { parseFormData } from "@/lib/validations/parse-form";
+import { SignInInput, signInSchema } from "@/lib/validations/auth";
 
 import { useSignIn } from "@/lib/utils/api/hooks/useSignIn";
-
-type FieldErrors = {
-  email?: string;
-  password?: string;
-  form?: string;
-};
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export function SignInForm() {
-  const router = useRouter();
 
   const { mutateAsync, isPending } = useSignIn();
 
-  const [errors, setErrors] = useState<FieldErrors>({});
+    const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm<SignInInput>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    resolver: zodResolver(signInSchema),
+  });
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setErrors({});
-
-    const result = parseFormData(
-      signInSchema,
-      new FormData(event.currentTarget),
-    );
-
-    if (!result.success) {
-      setErrors(result.errors);
-      return;
-    }
-
-    try {
-      const data = await mutateAsync(result.data);
-
-      localStorage.setItem("token", data.token);
-
-      router.push("/notes");
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        setErrors({
-          form: error.response?.data?.error?.message || "Failed to sign in",
-        });
-
-        return;
-      }
-
-      setErrors({
-        form: "Something went wrong. Please try again.",
-      });
-    }
+  const onsubmit = async (data: SignInInput) => {
+    mutateAsync(data)
   }
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+    <form className="space-y-5" onSubmit={handleSubmit(onsubmit)} noValidate>
       <FormField
         label="Email"
         id="email"
         type="email"
-        name="email"
+        {...register("email")}
         placeholder="you@example.com"
         autoComplete="email"
         required
@@ -79,7 +50,7 @@ export function SignInForm() {
       <PasswordField
         label="Password"
         id="password"
-        name="password"
+        {...register("password")}
         placeholder="••••••••"
         autoComplete="current-password"
         required
@@ -94,13 +65,6 @@ export function SignInForm() {
           </button>
         }
       />
-
-      {errors.form && (
-        <p className="text-sm text-red-600" role="alert">
-          {errors.form}
-        </p>
-      )}
-
       <div className="pt-1">
         <Button
           type="submit"

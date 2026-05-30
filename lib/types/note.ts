@@ -8,17 +8,32 @@ export type Collaborator = {
   presence?: "editing" | "viewing" | "offline";
 };
 
-export type Note = {
-  id: string;
-  title: string;
-  content: string;
-  pinned: boolean;
-  updatedAt: string;
-  collaborators: Collaborator[];
-};
-
 export type NoteInput = {
   title: string;
   content: string;
   collaborators?: Collaborator[];
 };
+
+export interface NoteContent {
+  type: string;
+  content: unknown[];
+}
+
+export interface Note {
+  id: string;
+  title: string;
+  content: NoteContent;
+  contentFormat: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+  role: "OWNER" | "EDITOR" | "VIEWER";
+  canEdit: boolean;
+  pinned: boolean;
+  pinnedAt: string | null;
+}
+
+export interface GetNoteResponse {
+  owned: Note[];
+  shared: Note[];
+}

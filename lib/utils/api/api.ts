@@ -1,4 +1,5 @@
 import axios from "axios";
+import cookie from "js-cookie";
 
 const api = axios.create({
   baseURL: "https://task-manager-6628.onrender.com",
@@ -6,11 +7,11 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
 });
+
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = cookie.get("notes-access");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,8 +25,7 @@ api.interceptors.response.use(
   (error) => {
     console.log("error from axios", error);
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-
+      cookie.remove("notes-access");
       window.location.href = "/signin";
     }
 

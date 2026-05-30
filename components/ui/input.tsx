@@ -1,7 +1,8 @@
 import type { InputHTMLAttributes } from "react";
+import { FieldError } from "react-hook-form";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
-  error?: string;
+  error?: string | FieldError | undefined;
 };
 
 export function Input({ error, className = "", id, ...props }: InputProps) {
@@ -27,7 +28,7 @@ export function Input({ error, className = "", id, ...props }: InputProps) {
       />
       {error && id && (
         <p id={`${id}-error`} className="mt-1.5 text-sm text-red-600" role="alert">
-          {error}
+          {typeof error === "string" ? error : error.message}
         </p>
       )}
     </div>

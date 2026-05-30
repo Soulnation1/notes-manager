@@ -1,9 +1,19 @@
 import api from "./api";
-import type { Note, NoteInput, Collaborator } from "@/lib/types/note";
+import type { Note,  NoteInput, Collaborator, GetNoteResponse } from "@/lib/types/note";
 
 // Fetch all notes
-export const getNotes = async (): Promise<Note[]> => {
+export const getNotes = async (): Promise<GetNoteResponse> => {
   const response = await api.get("/api/notes");
+  return response.data;
+};
+
+//create note
+
+export const createNote = async (noteData: {
+  title:string  
+  content:string
+}) => {
+  const response = await api.post("/api/notes", );
   return response.data;
 };
 
@@ -13,11 +23,16 @@ export const getNoteById = async (id: string): Promise<Note> => {
   return response.data;
 };
 
-// Create a new note
-export const createNote = async (noteData: NoteInput): Promise<Note> => {
-  const response = await api.post("/api/notes", noteData);
-  return response.data;
-};
+
+
+
+
+
+
+
+
+
+
 
 // Update an existing note
 export const updateNote = async ({

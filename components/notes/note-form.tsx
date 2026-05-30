@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/toast";
-import { noteFormSchema } from "@/lib/validations/note";
-import { parseFormData } from "@/lib/validations/parse-form";
+import { useCreateNotes } from "@/lib/utils/api/hooks/useCreateNotes";
+import { NoteFormInput, noteFormSchema } from "@/lib/validations/note";
 
 type NoteFormProps = {
   mode: "create" | "edit";
@@ -21,49 +22,49 @@ export function NoteForm({
   mode,
   initialTitle = "",
   initialContent = "",
-  onSubmit,
+  
   onCancel,
   submitLabel,
 }: NoteFormProps) {
-  const { showToast } = useToast();
-  const [title, setTitle] = useState(initialTitle);
-  const [content, setContent] = useState(initialContent);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const result = parseFormData(noteFormSchema, new FormData(e.currentTarget));
-
-    if (!result.success) {
-      setErrors(result.errors);
-      showToast("Please fix the note details.", "error");
-      return;
+  
+  const {mutateAsync,isPending } = useCreateNotes()
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    getValues,
+    formState: { errors, isSubmitting, },
+  } = useForm<NoteFormInput>({
+    defaultValues: {
+      title: initialTitle,
+      content: initialContent,
+    },
+    resolver: zodResolver(noteFormSchema),
+  });
+   const onsubmit = async (data: NoteFormInput) => {
+      mutateAsync(data)
     }
-
-    setErrors({});
-    onSubmit(result.data);
-  }
 
   const label =
     submitLabel ?? (mode === "create" ? "Create note" : "Save changes");
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+    <form
+      onSubmit={handleSubmit(onsubmit)}
+      className="space-y-6"
+      noValidate
+    >
       <div className="space-y-1.5">
         <label htmlFor="note-title" className="text-sm font-medium text-ink">
           Title
         </label>
+
         <Input
           id="note-title"
-          name="title"
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-            setErrors((prev) => ({ ...prev, title: "" }));
-          }}
           placeholder="Note title"
           className="text-lg font-medium"
-          error={errors.title}
+          error={errors.title?.message}
+          {...register("title")}
         />
       </div>
 
@@ -71,22 +72,22 @@ export function NoteForm({
         <label htmlFor="note-content" className="text-sm font-medium text-ink">
           Content
         </label>
+
         <Textarea
           id="note-content"
-          name="content"
-          value={content}
-          onChange={(value) => {
-            setContent(value);
-            setErrors((prev) => ({ ...prev, content: "" }));
-          }}
-          placeholder="Start writing…"
+          placeholder="Start writing..."
           className="min-h-[280px] font-normal"
-          error={errors.content}
+          value={getValues("content")}
+          onChange={(value) => setValue("content", value)}
+          error={errors.content?.message}
         />
       </div>
 
       <div className="flex flex-wrap gap-2 border-t border-border pt-4">
-        <Button type="submit">{label}</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {label}
+        </Button>
+
         {onCancel && (
           <Button type="button" variant="ghost" onClick={onCancel}>
             Cancel

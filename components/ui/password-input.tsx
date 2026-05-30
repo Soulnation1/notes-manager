@@ -2,12 +2,13 @@
 
 import { useId, useState } from "react";
 import type { InputHTMLAttributes } from "react";
+import { FieldError } from "react-hook-form";
 
 type PasswordInputProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "type"
 > & {
-  error?: string;
+  error?: string | FieldError | undefined;
 };
 
 function EyeIcon({ open }: { open: boolean }) {
@@ -107,7 +108,7 @@ export function PasswordInput({
       </div>
       {error && (
         <p id={`${id}-error`} className="mt-1.5 text-sm text-red-600" role="alert">
-          {error}
+          {typeof error === "string" ? error : error.message}
         </p>
       )}
     </div>

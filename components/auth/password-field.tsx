@@ -3,12 +3,13 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { FieldError } from "react-hook-form";
 
 type PasswordFieldProps = {
   label: string;
   id: string;
   required?: boolean;
-  error?: string;
+  error?: string | FieldError | undefined;
   labelAction?: ReactNode;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
 

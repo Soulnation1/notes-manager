@@ -1,12 +1,13 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FieldError } from "react-hook-form";
 
 type FormFieldProps = {
   label: string;
   id: string;
   required?: boolean;
-  error?: string;
+  error?: string | FieldError | undefined;
   labelAction?: ReactNode;
 } & InputHTMLAttributes<HTMLInputElement>;
 

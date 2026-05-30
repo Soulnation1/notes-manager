@@ -1,12 +1,10 @@
 import { AuthCard } from "@/components/auth/auth-card";
 import { AuthFooter } from "@/components/auth/auth-footer";
 import { AuthHeader } from "@/components/auth/auth-header";
-import { AuthLayout } from "@/components/auth/auth-layout";
 import { SignUpForm } from "@/components/auth/sign-up-form";
 
 export default function SignUpPage() {
   return (
-    <AuthLayout>
       <AuthCard>
         <AuthHeader
           eyebrow="Get started"
@@ -22,6 +20,5 @@ export default function SignUpPage() {
           href="/signin"
         />
       </AuthCard>
-    </AuthLayout>
   );
 }

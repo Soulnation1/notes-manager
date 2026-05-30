@@ -2,6 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import cookie from "js-cookie";
 
 import { signInUser,  } from "../authApi";
 import { useToast } from "@/components/ui/toast";
@@ -11,13 +12,13 @@ export const useSignIn = () => {
   const { showToast } = useToast();
   const { data, error, isPending, mutateAsync } = useMutation({
     mutationFn: signInUser,
-    onSuccess: () => {
+    onSuccess: (data) => {
       showToast("Signed in successfully!");
-      router.push("/dashboard");
+       cookie.set("notes-access", data.token, { path: "/" });
+        router.push("/notes");
     },
     onError: (error) => {
-      console.log(error);
-      showToast("Failed to sign in.");
+      showToast(error.message || "Failed to sign in.");
     },
   });
   return {

@@ -11,7 +11,7 @@ type TextareaProps = {
   value?: string;
   placeholder?: string;
   onChange?: (value: string) => void;
-};
+}
 
 export function Textarea({
   error,

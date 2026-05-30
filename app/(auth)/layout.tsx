@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
-import { Logo } from "../logo";
+import { Logo } from "../../components/logo";
 
 type AuthLayoutProps = {
   children: ReactNode;
 };
 
-export function AuthLayout({ children }: AuthLayoutProps) {
+function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-10 sm:py-14">
       <div
@@ -35,3 +35,5 @@ export function AuthLayout({ children }: AuthLayoutProps) {
     </div>
   );
 }
+
+export default AuthLayout

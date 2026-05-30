@@ -1,4 +1,4 @@
-import type { Note } from "@/lib/types/note";
+import type { GetNoteResponse, Note } from "@/lib/types/note";
 
 function stripHtml(content: string): string {
   return content
@@ -22,6 +22,7 @@ export function getNotePreview(content: string, maxLength = 80): string {
 }
 
 export function sortNotes(notes: Note[]): Note[] {
+  console.log("Sorting notes:", notes);
   return [...notes].sort((a, b) => {
     if (a.pinned !== b.pinned) {
       return a.pinned ? -1 : 1;
@@ -30,11 +31,12 @@ export function sortNotes(notes: Note[]): Note[] {
   });
 }
 
-export function splitPinnedNotes(notes: Note[]): {
+export function splitPinnedNotes(notes: GetNoteResponse): {
   pinned: Note[];
   unpinned: Note[];
 } {
-  const sorted = sortNotes(notes);
+  console.log("Splitting notes into pinned and unpinned:", notes);
+  const sorted = sortNotes(notes?.owned?.concat(notes?.shared));
   return {
     pinned: sorted.filter((n) => n.pinned),
     unpinned: sorted.filter((n) => !n.pinned),
